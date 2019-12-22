@@ -7,6 +7,7 @@ export interface IImport {
   node: SyntaxNode;
   fromUri: string;
   fromModuleName: string;
+  packageName: string;
   type: NodeType;
 }
 
@@ -47,6 +48,7 @@ export class Imports implements IImports {
                 fromModuleName: moduleNameNode.text,
                 fromUri: foundModule.uri,
                 node: foundModuleNode,
+                packageName: "todoooo",
                 type: "Module",
               });
 
@@ -186,6 +188,7 @@ export class Imports implements IImports {
             fromModuleName: moduleNameNode.text,
             fromUri: uri,
             node: element.syntaxNode,
+            packageName: "todoooo",
             type: element.type,
           });
           break;
@@ -195,6 +198,7 @@ export class Imports implements IImports {
             fromModuleName: moduleNameNode.text,
             fromUri: uri,
             node: element.syntaxNode,
+            packageName: "todoooo",
             type: element.type,
           });
           if (element.exposedUnionConstructors) {
@@ -205,6 +209,7 @@ export class Imports implements IImports {
                   fromModuleName: moduleNameNode.text,
                   fromUri: uri,
                   node: a.syntaxNode,
+                  packageName: "todoooo",
                   type: "UnionConstructor" as NodeType,
                 };
               }),
@@ -219,6 +224,7 @@ export class Imports implements IImports {
                     fromModuleName: moduleNameNode.text,
                     fromUri: uri,
                     node: a.syntaxNode,
+                    packageName: "todoooo",
                     type: "UnionConstructor" as NodeType,
                   };
                 }),
@@ -283,6 +289,7 @@ import Platform.Sub as Sub exposing ( Sub )
         fromModuleName: moduleName,
         fromUri: uri,
         node: element.syntaxNode,
+        packageName: "todoooo",
         type: element.type,
       });
     });
@@ -309,6 +316,7 @@ import Platform.Sub as Sub exposing ( Sub )
         fromModuleName: moduleNameNode.text,
         fromUri: foundModule.uri,
         node: a.syntaxNode,
+        packageName: "todoooo",
         type: a.type,
       };
     });

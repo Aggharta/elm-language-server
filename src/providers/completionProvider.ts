@@ -15,6 +15,7 @@ import { IImports } from "../imports";
 import { getEmptyTypes } from "../util/elmUtils";
 import { HintHelper } from "../util/hintHelper";
 import { TreeUtils } from "../util/treeUtils";
+import rankings from "./ranking.json";
 
 export class CompletionProvider {
   private connection: IConnection;
@@ -88,6 +89,7 @@ export class CompletionProvider {
             CompletionItemKind.Text,
             nodeAtLineBefore.text,
             replaceRange,
+            false,
           ),
         ];
       } else if (
@@ -103,6 +105,7 @@ export class CompletionProvider {
             CompletionItemKind.Text,
             nodeAtLineAfter.text,
             replaceRange,
+            false,
           ),
         ];
       } else if (previousWord && previousWord === "module") {
@@ -237,6 +240,9 @@ export class CompletionProvider {
       const importList = this.imports.imports[uri];
       importList.forEach(element => {
         const value = HintHelper.createHint(element.node);
+        const x: { stars: number; popularity: number } = (rankings as {
+          [index: string]: { stars: number; popularity: number };
+        })[element.packageName];
         switch (element.type) {
           case "Function":
             completions.push(
@@ -270,7 +276,7 @@ export class CompletionProvider {
 
     completions.push(
       ...getEmptyTypes().map(a =>
-        this.createCompletion(a.markdown, a.symbolKind, a.name, range),
+        this.createCompletion(a.markdown, a.symbolKind, a.name, range, false),
       ),
     );
 
@@ -374,6 +380,7 @@ export class CompletionProvider {
       CompletionItemKind.Function,
       label,
       range,
+      true,
     );
   }
 
@@ -400,6 +407,7 @@ export class CompletionProvider {
       CompletionItemKind.Enum,
       label,
       range,
+      true,
     );
   }
 
@@ -413,6 +421,7 @@ export class CompletionProvider {
       CompletionItemKind.Struct,
       label,
       range,
+      false,
     );
   }
 
@@ -426,6 +435,7 @@ export class CompletionProvider {
       CompletionItemKind.Operator,
       label,
       range,
+      false,
     );
   }
 
@@ -438,6 +448,7 @@ export class CompletionProvider {
       CompletionItemKind.EnumMember,
       label,
       range,
+      false,
     );
   }
 
@@ -447,6 +458,7 @@ export class CompletionProvider {
       CompletionItemKind.Module,
       label,
       range,
+      true,
     );
   }
 
@@ -455,6 +467,7 @@ export class CompletionProvider {
     kind: CompletionItemKind,
     label: string,
     range: Range,
+    sortType: boolean,
   ): CompletionItem {
     return {
       documentation: {
@@ -463,6 +476,7 @@ export class CompletionProvider {
       },
       kind,
       label,
+      sortText: sortType ? `a_${label}` : `x_${label}`,
       textEdit: TextEdit.replace(range, label),
     };
   }
@@ -613,6 +627,7 @@ export class CompletionProvider {
       insertTextFormat: InsertTextFormat.Snippet,
       kind: kind ?? CompletionItemKind.Snippet,
       label,
+      sortText: `s_${label}`,
     };
   }
 
