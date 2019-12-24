@@ -84,7 +84,7 @@ export class ElmWorkspace {
   public async init() {
     const settings = await this.settings.getClientSettings();
 
-    const documentFormatingProvider = new DocumentFormattingProvider(
+    this.documentFormatingProvider = new DocumentFormattingProvider(
       this.connection,
       this.elmWorkspace,
       this.textDocumentEvents,

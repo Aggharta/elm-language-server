@@ -10,14 +10,7 @@ import { Settings } from "../util/settings";
 import { TextDocumentEvents } from "../util/textDocumentEvents";
 
 export class DocumentFormattingProvider {
-  constructor(
-    private connection: IConnection,
-    private elmWorkspaceFolder: URI,
-    private events: TextDocumentEvents,
-    private settings: Settings,
-  ) {
-    this.connection.onDocumentFormatting(this.handleFormattingRequest);
-  }
+  constructor(private connection: IConnection, private settings: Settings) {}
 
   public formatText = async (
     elmFormatPath: string,
@@ -43,9 +36,7 @@ export class DocumentFormattingProvider {
     }
   };
 
-  protected handleFormattingRequest = async (
-    params: DocumentFormattingParams,
-  ) => {
+  public handleFormattingRequest = async (params: DocumentFormattingParams) => {
     this.connection.console.info(`Formatting was requested`);
     try {
       const text = this.events.get(params.textDocument.uri);

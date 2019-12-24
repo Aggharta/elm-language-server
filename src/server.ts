@@ -4,12 +4,15 @@ import {
   Connection,
   InitializeParams,
   InitializeResult,
+  DocumentFormattingParams,
 } from "vscode-languageserver";
 import { URI } from "vscode-uri";
 import Parser from "web-tree-sitter";
 import { CapabilityCalculator } from "./capabilityCalculator";
 import { ElmWorkspace } from "./elmWorkspace";
 import { Settings } from "./util/settings";
+import * as rxjs from "rxjs";
+import { DocumentFormattingProvider } from "./providers/documentFormatingProvider";
 
 export interface ILanguageServer {
   readonly capabilities: InitializeResult;
@@ -21,6 +24,7 @@ export class Server implements ILanguageServer {
   private calculator: CapabilityCalculator;
   private settings: Settings;
   private elmWorkspaceMap: Map<string, ElmWorkspace> = new Map();
+  private documentFormatingProvider: DocumentFormattingProvider;
 
   constructor(
     private connection: Connection,
@@ -72,6 +76,21 @@ export class Server implements ILanguageServer {
             ),
           );
         });
+
+        this.documentFormatingProvider = new DocumentFormattingProvider(
+          this.connection,
+          this.elmWorkspace,
+          this.textDocumentEvents,
+          this.settings,
+        );
+        this.connection.onDocumentFormatting(event =>
+          this.documentFormatingProvider.handleFormattingRequest(
+            event,
+            elmWorkspace,
+          ),
+        );
+
+        this.elmWorkspaceMap.forEach(a => {});
       } else {
         this.connection.window.showErrorMessage(
           "No elm.json found. Please run 'elm init' in your main directory.",
