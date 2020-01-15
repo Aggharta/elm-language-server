@@ -8,7 +8,7 @@ import {
 import { URI } from "vscode-uri";
 import Parser from "web-tree-sitter";
 import { CapabilityCalculator } from "./capabilityCalculator";
-import { ElmWorkspace } from "./elmWorkspace";
+import { PKMWorkspace } from "./pkmWorkspace";
 import { Settings } from "./util/settings";
 
 export interface ILanguageServer {
@@ -20,7 +20,7 @@ export interface ILanguageServer {
 export class Server implements ILanguageServer {
   private calculator: CapabilityCalculator;
   private settings: Settings;
-  private elmWorkspaceMap: Map<string, ElmWorkspace> = new Map();
+  private elmWorkspaceMap: Map<string, PKMWorkspace> = new Map();
 
   constructor(
     private connection: Connection,
@@ -64,7 +64,7 @@ export class Server implements ILanguageServer {
         topLevelElmJsons.forEach(elmWorkspace => {
           this.elmWorkspaceMap.set(
             elmWorkspace.toString(),
-            new ElmWorkspace(
+            new PKMWorkspace(
               elmWorkspace,
               connection,
               this.settings,

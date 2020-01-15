@@ -39,6 +39,7 @@
     "pretty-quick": "^2.0.1",
     "tree-sitter-cli": "^0.16.2",
     "tree-sitter-elm": "^2.7.4",
+    "tree-sitter-pkm": "^0.0.7",
     "ts-jest": "^24.2.0",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",

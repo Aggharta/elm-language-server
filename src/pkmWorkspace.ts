@@ -37,27 +37,27 @@ interface IFolder {
   writeable: boolean;
 }
 
-export class ElmWorkspace {
+export class PKMWorkspace {
   private documentEvents: DocumentEvents;
   private textDocumentEvents: TextDocumentEvents;
   private forest: Forest = new Forest();
   private imports: IImports;
 
   constructor(
-    private elmWorkspace: URI,
+    private pkmWorkspace: URI,
     private connection: IConnection,
     private settings: Settings,
     private parser: Parser,
   ) {
     this.connection.console.info(
-      `Starting language server for folder: ${this.elmWorkspace}`,
+      `Starting language server for folder: ${this.pkmWorkspace}`,
     );
 
     this.imports = new Imports(parser);
 
     this.documentEvents = new DocumentEvents(
       this.connection,
-      this.elmWorkspace,
+      this.pkmWorkspace,
     );
     this.textDocumentEvents = new TextDocumentEvents(this.documentEvents);
   }
@@ -87,16 +87,16 @@ export class ElmWorkspace {
 
     const documentFormatingProvider = new DocumentFormattingProvider(
       this.connection,
-      this.elmWorkspace,
+      this.pkmWorkspace,
       this.textDocumentEvents,
       this.settings,
     );
 
-    const elmAnalyse =
+    const pkmAnalyse =
       settings.elmAnalyseTrigger !== "never"
         ? new ElmAnalyseDiagnostics(
             this.connection,
-            this.elmWorkspace,
+            this.pkmWorkspace,
             this.textDocumentEvents,
             this.settings,
             documentFormatingProvider,
@@ -105,21 +105,21 @@ export class ElmWorkspace {
 
     const elmMake = new ElmMakeDiagnostics(
       this.connection,
-      this.elmWorkspace,
+      this.pkmWorkspace,
       this.settings,
     );
 
     // tslint:disable:no-unused-expression
     new DiagnosticsProvider(
       this.connection,
-      this.elmWorkspace,
+      this.pkmWorkspace,
       this.settings,
       this.textDocumentEvents,
-      elmAnalyse,
+      pkmAnalyse,
       elmMake,
     );
 
-    new CodeActionProvider(this.connection, elmAnalyse, elmMake);
+    new CodeActionProvider(this.connection, pkmAnalyse, elmMake);
 
     await this.initWorkspace();
   }
@@ -129,7 +129,7 @@ export class ElmWorkspace {
     try {
       elmVersion = await utils.getElmVersion(
         await this.settings.getClientSettings(),
-        this.elmWorkspace,
+        this.pkmWorkspace,
         this.connection,
       );
     } catch (e) {
@@ -138,38 +138,38 @@ export class ElmWorkspace {
       );
     }
     try {
-      const pathToElmJson = path.join(this.elmWorkspace.fsPath, "elm.json");
-      this.connection.console.info(`Reading elm.json from ${pathToElmJson}`);
+      const pathToPackageJson = path.join(this.pkmWorkspace.fsPath, "package.json");
+      this.connection.console.info(`Reading package.json from ${pathToPackageJson}`);
       // Find elm files and feed them to tree sitter
-      const elmJson = require(pathToElmJson);
-      const type = elmJson.type;
-      const elmFolders: Array<{
+      const packageJson = require(pathToPackageJson);
+      const type = packageJson.type;
+      const pkmFolders: Array<{
         uri: string;
         writeable: boolean;
         maintainerAndPackageName?: string;
       }> = [];
       if (type === "application") {
-        elmJson["source-directories"].forEach(async (folder: string) => {
-          elmFolders.push({
+        packageJson["source-directories"].forEach(async (folder: string) => {
+          pkmFolders.push({
             maintainerAndPackageName: undefined,
-            uri: path.join(this.elmWorkspace.fsPath, folder),
+            uri: path.join(this.pkmWorkspace.fsPath, folder),
             writeable: true,
           });
         });
       } else {
-        elmFolders.push({
+        pkmFolders.push({
           maintainerAndPackageName: undefined,
-          uri: path.join(this.elmWorkspace.fsPath, "src"),
+          uri: path.join(this.pkmWorkspace.fsPath, "src"),
           writeable: true,
         });
       }
-      elmFolders.push({
+      pkmFolders.push({
         maintainerAndPackageName: undefined,
-        uri: path.join(this.elmWorkspace.fsPath, "tests"),
+        uri: path.join(this.pkmWorkspace.fsPath, "tests"),
         writeable: true,
       });
       this.connection.console.info(
-        `${elmFolders.length} source-dirs and test folders found`,
+        `${pkmFolders.length} source-dirs and test folders found`,
       );
 
       const elmHome = this.findElmHome();
@@ -179,10 +179,10 @@ export class ElmWorkspace {
       const dependencies: { [index: string]: string } =
         type === "application"
           ? {
-              ...elmJson.dependencies.direct,
-              ...elmJson["test-dependencies"].direct,
+              ...packageJson.dependencies.direct,
+              ...packageJson["test-dependencies"].direct,
             }
-          : { ...elmJson.dependencies, ...elmJson["test-dependencies"] };
+          : { ...packageJson.dependencies, ...packageJson["test-dependencies"] };
       if (type === "application") {
         for (const key in dependencies) {
           if (dependencies.hasOwnProperty(key)) {
@@ -190,7 +190,7 @@ export class ElmWorkspace {
             const packageName = key.substring(key.indexOf("/") + 1, key.length);
 
             const pathToPackageWithVersion = `${packagesRoot}${maintainer}/${packageName}/${dependencies[key]}/src`;
-            elmFolders.push({
+            pkmFolders.push({
               maintainerAndPackageName: `${maintainer}/${packageName}`,
               uri: pathToPackageWithVersion,
               writeable: false,
@@ -223,7 +223,7 @@ export class ElmWorkspace {
                   allVersionFolders[allVersionFolders.length - 1].versionPath
                 }/src`;
 
-            elmFolders.push({
+            pkmFolders.push({
               maintainerAndPackageName: `${maintainer}/${packageName}`,
               uri: pathToPackageWithVersion,
               writeable: false,
@@ -232,7 +232,7 @@ export class ElmWorkspace {
         }
       }
 
-      const elmFilePaths = this.findElmFilesInFolders(elmFolders);
+      const elmFilePaths = this.findElmFilesInFolders(pkmFolders);
       this.connection.console.info(
         `Found ${elmFilePaths.length.toString()} files to add to the project`,
       );
